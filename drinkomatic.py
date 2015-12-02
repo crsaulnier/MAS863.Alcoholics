@@ -18,6 +18,7 @@ from pygestalt.utilities import notice
 from pygestalt.publish import rpc	#remote procedure call dispatcher
 import time
 import io
+import math
 
 
 #------VIRTUAL MACHINE------
@@ -28,22 +29,32 @@ class virtualMachine(machines.virtualMachine):
 		else: self.fabnet = interfaces.gestaltInterface('FABNET', interfaces.serialInterface(baudRate = 115200, interfaceType = 'ftdi', portName = '/dev/tty.usbserial-FTY4ULMS'))
 		
 	def initControllers(self):
+
+		self.polarAxisNode = nodes.networkedGestaltNode('Polar Axis', self.fabnet, filename = '086-005a.py', persistence = self.persistence)
+
 		self.y1AxisNode = nodes.networkedGestaltNode('Y1 Axis', self.fabnet, filename = '086-005a.py', persistence = self.persistence)
 		self.y2AxisNode = nodes.networkedGestaltNode('Y2 Axis', self.fabnet, filename = '086-005a.py', persistence = self.persistence)
 
-		self.yyNode = nodes.compoundNode(self.y1AxisNode, self.y2AxisNode)
+		#self.yyNode = nodes.compoundNode(self.y1AxisNode, self.y2AxisNode)
+		self.machineNode = nodes.compoundNode(self.polarAxisNode, self.y1AxisNode, self.y2AxisNode)
 
 	def initCoordinates(self):
-		self.position = state.coordinate(['mm', 'mm'])
+		self.position = state.coordinate(['mm', 'mm', 'mm'])
 	
 	def initKinematics(self):
+
+		self.polarAxis = elements.elementChain.forward([elements.microstep.forward(4), elements.stepper.forward(1.8), elements.pulley.forward(18.923), elements.invert.forward(False)])
+
+		# the argument to pulley.forward is the diameter of the circle that the button poker travels in
+		# one full revolution of the poker is a coordinate of the diameter of the circle it travels in, times pi
+
 		self.y1Axis = elements.elementChain.forward([elements.microstep.forward(4), elements.stepper.forward(1.8), elements.leadscrew.forward(8), elements.invert.forward(False)])
 		self.y2Axis = elements.elementChain.forward([elements.microstep.forward(4), elements.stepper.forward(1.8), elements.leadscrew.forward(8), elements.invert.forward(False)])
 
-		self.stageKinematics = kinematics.direct(2)	#direct drive on all axes
+		self.stageKinematics = kinematics.direct(3)	#direct drive on all axes
 	
 	def initFunctions(self):
-		self.move = functions.move(virtualMachine = self, virtualNode = self.yyNode, axes = [self.y1Axis, self.y2Axis], kinematics = self.stageKinematics, machinePosition = self.position,planner = 'null')
+		self.move = functions.move(virtualMachine = self, virtualNode = self.machineNode, axes = [self.polarAxis, self.y1Axis, self.y2Axis], kinematics = self.stageKinematics, machinePosition = self.position,planner = 'null')
 		self.jog = functions.jog(self.move)	#an incremental wrapper for the move function
 		pass
 		
@@ -81,10 +92,14 @@ if __name__ == '__main__':
 	#stages.xyNode.setMotorCurrent(0.7)
 
 	# This is for how fast the 
-	stages.yyNode.setVelocityRequest(8)
+	stages.machineNode.setVelocityRequest(8)
 	
 	# Some random moves to test with
-	moves = [[10,10],[20,20],[10,10],[0,0]]
+	# moves = [[10,10, 10],[20,20, 20],[10,10, 10],[0,0,0]]
+	#moves = [[31.5,0, 0]]
+	moves = [[18.923*math.pi, 0, 0]]
+	
+	# one full revolution of the poker is a coordinate of the diameter of the circle it travels in, times pi
 	
 	# Move!
 	for move in moves:
