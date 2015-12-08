@@ -202,38 +202,20 @@ client.subscribe('publicLists')
 
 
 # -------------------------------------------------------------------------
-# This is where the machine magic happens
+# THIS IS WHERE THE MACHINE MAGIC HAPPENS
 # -------------------------------------------------------------------------
 # The persistence file remembers the node you set. It'll generate the first time you run the
 # file. If you are hooking up a new node, delete the previous persistence file.
 stages = virtualMachine(persistenceFile = "test.vmp")
-	
-	
+
 # This is for how fast the
 stages.machineNode.setVelocityRequest(8)
 	
-# Some random moves to test with
-# moves = [[10,10, 10],[20,20, 20],[10,10, 10],[0,0,0]]
-#moves = [[31.5,0, 0]]
-moves = [[166.6875*math.pi*1/8, 0, 0], [166.6875*math.pi*1/8, 20, 20], [166.6875*math.pi*1/8, 0, 0],
-			[166.6875*math.pi*2/8, 0, 0], [166.6875*math.pi*2/8, 20, 20], [166.6875*math.pi*2/8, 0, 0],
-			[166.6875*math.pi*3/8, 0, 0], [166.6875*math.pi*3/8, 20, 20], [166.6875*math.pi*3/8, 0, 0],
-			[166.6875*math.pi*4/8, 0, 0], [166.6875*math.pi*4/8, 20, 20], [166.6875*math.pi*4/8, 0, 0],
-			[166.6875*math.pi*5/8, 0, 0], [166.6875*math.pi*5/8, 20, 20], [166.6875*math.pi*5/8, 0, 0],
-			[166.6875*math.pi*6/8, 0, 0], [166.6875*math.pi*6/8, 20, 20], [166.6875*math.pi*6/8, 0, 0],
-			[166.6875*math.pi*7/8, 0, 0], [166.6875*math.pi*7/8, 20, 20], [166.6875*math.pi*7/8, 0, 0],
-			[166.6875*math.pi*8/8, 0, 0], [166.6875*math.pi*8/8, 20, 20], [166.6875*math.pi*8/8, 0, 0]]
-		
-# one full revolution of the poker is a coordinate of the diameter of the circle it travels in, times pi
+# THESE ARE THE HELPER FUNCTIONS YOU NEED TO MOVE THINGS AROUND
 
-# Move!
-for move in moves:
-    stages.move(move, 0)
-    status = stages.y1AxisNode.spinStatusRequest()
-	 # This checks to see if the move is done.
-    while status['stepsRemaining'] > 0:
-        time.sleep(0.001)
-        status = stages.y1AxisNode.spinStatusRequest()
+# pour from each bottle for x seconds
+stages.do_a_spin(2)
+
 
 # (sort of) hacky way to keep the client alive
 # ctrl + c to kill the script

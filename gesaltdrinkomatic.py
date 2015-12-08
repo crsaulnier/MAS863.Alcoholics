@@ -22,7 +22,13 @@ import math
 
 #------VIRTUAL MACHINE------
 class virtualMachine(machines.virtualMachine):
-	
+
+	# THESE ARE MAGIC NUMBERS THAT LET EVERYTHING WORK TOGETHER
+	diameter = 166.6875
+	numBottles = 8
+	top = 100
+	deltaDown = 20
+
 	def initInterfaces(self):
 		if self.providedInterface: self.fabnet = self.providedInterface		#providedInterface is defined in the virtualMachine class.
 		else: self.fabnet = interfaces.gestaltInterface('FABNET', interfaces.serialInterface(baudRate = 115200, interfaceType = 'ftdi', portName = '/dev/tty.usbserial-FTY4ULMS'))
@@ -76,12 +82,68 @@ class virtualMachine(machines.virtualMachine):
 		#self.machineControl.pwmRequest(speedFraction)
 		pass
 
-	def moveDown(self):
+	# THESE ARE THE HELPER FUNCTIONS THAT MAKE THINGS HAPPEN
+	def blockOnMove(self):
+		status = self.y1AxisNode.spinStatusRequest()
+		# This checks to see if the move is done.
+		while status['stepsRemaining'] > 0:
+			time.sleep(0.001)
+			status = self.y1AxisNode.spinStatusRequest()
+
+	# moves to (x, top, top)
+	def moveUp(self):
 		current = self.getPosition()
-		current[1] = 0
-		current[2] = 0
-		self.setposition(current)
+		newPosition = [0, self.top, self.top]
+		newPosition[0] = current['position'][0]
+		self.move(newPosition, 0)
+
+	# moves to (x, 0, 0)
+	def moveBottom(self):
+		current = self.getPosition()
+		newPosition = [0, 0, 0]
+		newPosition[0] = current['position'][0]
+		self.move(newPosition, 0)
+	
+	# moves down enough to spin the platform
+	def jogDown(self):
+		current = self.getPosition()
+		newPosition = [0, self.top-self.deltaDown, self.top-self.deltaDown]
+		newPosition[0] = current['position'][0]
+		self.move(newPosition, 0)
+
+	# rotates the platform to drink x
+	def rotateDrink(self, bottle):
+		current = self.getPosition()
+		newPosition = [self.diameter*math.pi*bottle/self.numBottles, 0, 0]
+		newPosition[1] = current['position'][1]
+		newPosition[2] = current['position'][2]
+		self.move(newPosition, 0)
+
+	# pour drink x for y seconds
+	def pourDrink(self, bottle, seconds):
+
+		# rotate to the proper bottle
+		self.rotateDrink(bottle)
+		# move to top as defined in the gestalt machine
+		self.moveUp()
+		# will not return until the platform is done the current move
+		self.blockOnMove()
+		# pour the drink for x seconds
+		time.sleep(seconds)
+		# jog down so you can rotate the platform and are no longer sleeping
+		self.jogDown()
+
+	# does a spin pouring from each bottle for x seconds
+	def do_a_spin(self, seconds):
+
+		for x in range (0, self.numBottles):
+			self.pourDrink(x, seconds)
 		
+		self.moveBottom()
+
+
+
+
 
 
 
