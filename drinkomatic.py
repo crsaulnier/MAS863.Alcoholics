@@ -1,7 +1,7 @@
 import time
 import math
 import copy
-
+import random
 from drink_mixing import mymix
 from gesaltdrinkomatic import *
 
@@ -111,6 +111,8 @@ def added(collection, id, fields):
         print('list_drinks_alcohol_return now:')
         print (list_drinks_alcohol_return)
         mymix(list_drinks_alcohol_return)
+		  
+		  #### add the gestalt function ******
         return list_drinks_alcohol_return
     else :
         print('not reached all elem list_drinks_alcohol_all return:')
@@ -214,16 +216,25 @@ stages.machineNode.setVelocityRequest(8)
 # THESE ARE THE HELPER FUNCTIONS YOU NEED TO MOVE THINGS AROUND
 
 # pour from each bottle for x seconds
-stages.do_a_spin(2)
+
+while True:
+	command = raw_input("Command:")
+	if command == "u":
+		stages.moveUp()
+	elif command == "d":
+		stages.moveBottom()
+	elif command == "r":
+		stages.machineNode.setVelocityRequest(1)
+		stages.rotateDrink(random.randint(0, 50))
+		stages.machineNode.setVelocityRequest(8)
+	elif command == "e":
+		break
+
 
 
 # (sort of) hacky way to keep the client alive
 # ctrl + c to kill the script
-while True:
-    try:
-        time.sleep(1)
-    except KeyboardInterrupt:
-        break
+
 
 client.unsubscribe('publicLists')
 #client.unsubscribe('lists')

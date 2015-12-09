@@ -24,10 +24,10 @@ import math
 class virtualMachine(machines.virtualMachine):
 
 	# THESE ARE MAGIC NUMBERS THAT LET EVERYTHING WORK TOGETHER
-	diameter = 166.6875
+	diameter = 100
 	numBottles = 8
-	top = 100
-	deltaDown = 20
+	top = 120
+	deltaDown = 120
 
 	def initInterfaces(self):
 		if self.providedInterface: self.fabnet = self.providedInterface		#providedInterface is defined in the virtualMachine class.
@@ -48,7 +48,7 @@ class virtualMachine(machines.virtualMachine):
 	
 	def initKinematics(self):
 
-		self.polarAxis = elements.elementChain.forward([elements.microstep.forward(4), elements.stepper.forward(1.8), elements.pulley.forward(166.6875), elements.invert.forward(False)])
+		self.polarAxis = elements.elementChain.forward([elements.microstep.forward(4), elements.stepper.forward(1.8), elements.pulley.forward(100), elements.invert.forward(False)])
 
 		# the argument to pulley.forward is the diameter of the circle that the button poker travels in
 		# one full revolution of the poker is a coordinate of the diameter of the circle it travels in, times pi
