@@ -26,8 +26,8 @@ class virtualMachine(machines.virtualMachine):
 	# THESE ARE MAGIC NUMBERS THAT LET EVERYTHING WORK TOGETHER
 	diameter = 100
 	numBottles = 8
-	top = 120
-	deltaDown = 120
+	top = 130
+	deltaDown = 130
 
 	def initInterfaces(self):
 		if self.providedInterface: self.fabnet = self.providedInterface		#providedInterface is defined in the virtualMachine class.

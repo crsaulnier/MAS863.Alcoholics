@@ -231,7 +231,6 @@ while True:
 		break
 
 
-
 # (sort of) hacky way to keep the client alive
 # ctrl + c to kill the script
 
